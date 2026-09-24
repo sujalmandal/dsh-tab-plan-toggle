@@ -1,6 +1,6 @@
 {
   "name": "dsh-tab-plan-toggle",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Toggle DeepSeek Harness plan mode with Tab in the composer",
   "type": "module",
   "main": "lib/index.js",
