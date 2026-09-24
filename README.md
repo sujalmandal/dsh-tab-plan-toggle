@@ -14,6 +14,12 @@ dsh plugin --profile web add dsh-tab-plan-toggle
 dsh web
 ```
 
+Straight from the repository, before (or instead of) a registry release:
+
+```bash
+dsh plugin --profile web add git+https://github.com/sujalmandal/dsh-tab-plan-toggle.git
+```
+
 Verify the row is composed before restarting:
 
 ```bash
