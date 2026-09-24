@@ -37,15 +37,22 @@ composer Tab keydown ──rpc /dsh-tab-plan-toggle──▶ host half
 
 ## Guards
 
-Tab is only intercepted when all of these hold: no `⌘`/`Ctrl`/`Alt`/`Shift`, no IME composition in flight, and the focused element is a `TEXTAREA` inside the composer. Everywhere else Tab keeps its normal behaviour.
+Tab is only intercepted when all of these hold:
+
+- no `⌘`/`Ctrl`/`Alt`/`Shift`, and no IME composition in flight;
+- the focused element is the composer's editor — its Lexical contenteditable host, or a `TEXTAREA` — and it sits inside `[data-input-scroll]`;
+- no suggestion menu is open (`[data-trigger-menu]` absent): inside the `/` or `@` menu, Tab means **Browse folder**.
+
+Everywhere else Tab keeps its normal behaviour.
 
 ## Troubleshooting
 
 | Symptom | Check |
 | --- | --- |
-| Tab does nothing | Only one `dsh-tab-plan-toggle` row in `--dump-config`. Two mounts means two handlers, and Tab toggles twice — a net no-op. |
+| Tab does nothing | The composer's editor is Lexical's contenteditable host, **not** a `TEXTAREA` — a guard that requires `TEXTAREA` can never match. Verify the editor reports `isContentEditable`. |
+| Tab still dead after an upgrade | Only one `dsh-tab-plan-toggle` row in `--dump-config`. Two mounts means two handlers, and Tab toggles twice — a net no-op. |
 | `… is not iterable` in the browser console | An older build read `session.events`; the Session API exposes `snapshotEvents()`. Upgrade. |
-| Tab hijacks other textareas | The guard requires the textarea to sit inside `[data-input-scroll]`; report the app surface if it does not. |
+| Tab hijacks other editors | The guard requires the editor to sit inside `[data-input-scroll]`; report the app surface if it does not. |
 
 ## License
 
