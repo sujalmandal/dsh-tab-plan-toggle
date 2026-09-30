@@ -1,69 +1,110 @@
-# dsh-tab-plan-toggle
+# Tab Plan Toggle
 
-Toggle [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) plan mode with **Tab** while the composer textarea has focus.
+**Press Tab to turn Plan mode on and off, right from the message box.**
 
-| Press | Result |
+No typing `/plan`. No hunting through menus. Just tap Tab while you're typing.
+
+---
+
+## What it does
+
+| You do this | What happens |
 | --- | --- |
-| `Tab` (composer focused, plan mode off) | plan mode on |
-| `Tab` (composer focused, plan mode on) | plan mode off |
+| Press `Tab` in the message box | Plan mode turns **on** |
+| Press `Tab` again | Plan mode turns **off** |
+
+A blue **Plan** badge appears in the message box whenever Plan mode is on, and the hint text changes to *"describe your task to generate plan"* — so you always know where you stand.
+
+Tab behaves normally everywhere else. It only toggles Plan mode when your cursor is in the message box, so it never gets in your way while you're writing code, reading, or moving around the app.
+
+---
 
 ## Install
 
+Open a terminal and run:
+
 ```bash
 dsh plugin --profile web add dsh-tab-plan-toggle
+```
+
+Then restart DeepSeek Harness:
+
+```bash
 dsh web
 ```
 
-Straight from the repository, before (or instead of) a registry release:
+That's it. Open the app and try pressing `Tab` while typing a message.
+
+<details>
+<summary>Prefer to install straight from GitHub?</summary>
 
 ```bash
 dsh plugin --profile web add git+https://github.com/sujalmandal/dsh-tab-plan-toggle.git
 ```
 
-Verify the row is composed before restarting:
+Both install methods are equivalent. Use whichever you prefer.
+
+</details>
+
+---
+
+## Everyday questions
+
+**I pressed Tab and nothing happened.**
+Make sure your cursor is actually *in the message box* — click into it first. Tab does nothing if you're focused somewhere else, which is on purpose.
+
+**The `/` command menu is open and Tab isn't toggling.**
+That's intended. Inside the `/` and `@` menus, Tab moves between menu items, exactly as it always has.
+
+**Does it work in every conversation?**
+Yes. It works in new chats and in conversations you already have open.
+
+**Will it survive DeepSeek Harness updates?**
+Yes — and this is the main thing the current version fixes. Earlier versions reached into the app's internals, so a Harness update could quietly break them. This version only uses the same public, supported controls the app itself uses to toggle Plan mode. It has nothing private left to break.
+
+---
+
+## Updating
 
 ```bash
-dsh --profile web --dump-config   # look for "# == dsh-tab-plan-toggle"
+dsh plugin --profile web add dsh-tab-plan-toggle
 ```
 
-## How it works
+Run the same command as installing. It fetches the newest version and replaces the old one.
 
+---
+
+## Uninstalling
+
+```bash
+dsh plugin --profile web remove dsh-tab-plan-toggle
 ```
-composer Tab keydown ──rpc /dsh-tab-plan-toggle──▶ host half
-                                                    │
-      ctx.get('agentPresets').serviceFor(agent,'planMode')
-                                                    │
-      target = !(pending ?? active)  ─────────────────┘
-      planMode.set(agent, target)
-```
 
-- The host half calls the plan-mode service, so entering and leaving produce the same narration notice as `/plan` — with no `command/run` row added to the conversation.
-- Plan mode lives inside an agent preset's `isolate` realm on `dsh web`, so a host row can only reach it through `agentPresets.serviceFor(agent, 'planMode')`. When that service is unavailable the plugin falls back to appending `plan/mode` to the session log.
-- `pending` from `planMode.get()` is the service's queued *target*, so it counts as the effective state: a second press reverses a queued change instead of becoming a no-op.
-- Each entry acts only for the composer it is mounted in: the guard resolves the composer holding this entry's marker and requires the focused editor to sit inside it.
-- The 0.1.0 guard asked only whether the focused element sat in *some* `[data-input-scroll]`, so with another conversation's entry still mounted, one press toggled both conversations.
+Then restart `dsh web`. Tab goes straight back to its normal behaviour.
 
-## Guards
+---
 
-Tab is only intercepted when all of these hold:
+## Requirements
 
-- no `⌘`/`Ctrl`/`Alt`/`Shift`, and no IME composition in flight;
-- the focused element is the composer's editor — its Lexical contenteditable host, or a `TEXTAREA` — and it sits inside `[data-input-scroll]`;
-- that editor belongs to the same composer as this entry's marker, so other conversations' composers cannot match;
-- no suggestion menu is open (`[data-trigger-menu]` absent): inside the `/` or `@` menu, Tab means **Browse folder**.
+- DeepSeek Harness `0.2.0-rc.2` or newer
+- The web UI (`dsh web`)
 
-Everywhere else Tab keeps its normal behaviour.
+---
 
-## Troubleshooting
+## For the curious
 
-| Symptom | Check |
-| --- | --- |
-| Tab does nothing | The composer's editor is Lexical's contenteditable host, **not** a `TEXTAREA` — a guard that requires `TEXTAREA` can never match. Verify the editor reports `isContentEditable`. Also confirm the entry's marker sits inside the same composer card as the editor. |
-| Tab toggles another conversation | Fixed in 0.1.1. On 0.1.0 each mounted composer added its own `document` keydown listener and any focused composer satisfied every one of them, so one press toggled every open conversation. |
-| Tab still dead after an upgrade | Only one `dsh-tab-plan-toggle` row in `--dump-config`. Two mounts means two handlers, and Tab toggles twice — a net no-op. |
-| Tab dead on DSH ≥ 0.2.0-rc.2 (`405` on `POST /dsh-tab-plan-toggle/toggle`) | Fixed in 0.1.2. Connection RPC handlers now register through a context that also owns `webServer`; the Host's `register()` re-reads `webServer` from the calling fiber, so a handler injected with only `connection` cannot register its route and the request falls through to the SPA fallback (`405`). Upgrade. |
-| `… is not iterable` in the browser console | An older build read `session.events`; the Session API exposes `snapshotEvents()`. Upgrade. |
-| Tab hijacks other editors | The guard requires the editor to sit inside `[data-input-scroll]`; report the app surface if it does not. |
+<details>
+<summary>How it works under the hood</summary>
+
+This is a small client-side plugin. It watches for Tab inside the composer, then runs DeepSeek Harness's own `/plan` and `/plan off` commands — the exact same ones you'd type by hand.
+
+Because it goes through the app's public command interface and its public plan-mode state, it reads the real value the app uses to decide whether Plan mode is on. That means the badge, the button, and this plugin always agree — there's no separate copy of the state that can drift.
+
+It uses **no host-side code and no private APIs**, which is what makes it durable across updates.
+
+</details>
+
+---
 
 ## License
 

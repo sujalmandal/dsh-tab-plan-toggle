@@ -1,6 +1,6 @@
 {
   "name": "dsh-tab-plan-toggle",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Toggle DeepSeek Harness plan mode with Tab in the composer",
   "type": "module",
   "main": "lib/index.js",
@@ -24,8 +24,17 @@
       "patch": "./cordis.patch.yml"
     },
     "client": {
-      "platform": "web"
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-api-gateway",
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
     }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": ">=0.2.0-rc.2"
   },
   "keywords": [
     "dsh",
@@ -36,6 +45,14 @@
     "plan-mode"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sujalmandal/dsh-tab-plan-toggle.git"
+  },
+  "homepage": "https://github.com/sujalmandal/dsh-tab-plan-toggle#readme",
+  "bugs": {
+    "url": "https://github.com/sujalmandal/dsh-tab-plan-toggle/issues"
+  },
   "engines": {
     "node": ">=18"
   },
