@@ -61,6 +61,7 @@ Everywhere else Tab keeps its normal behaviour.
 | Tab does nothing | The composer's editor is Lexical's contenteditable host, **not** a `TEXTAREA` — a guard that requires `TEXTAREA` can never match. Verify the editor reports `isContentEditable`. Also confirm the entry's marker sits inside the same composer card as the editor. |
 | Tab toggles another conversation | Fixed in 0.1.1. On 0.1.0 each mounted composer added its own `document` keydown listener and any focused composer satisfied every one of them, so one press toggled every open conversation. |
 | Tab still dead after an upgrade | Only one `dsh-tab-plan-toggle` row in `--dump-config`. Two mounts means two handlers, and Tab toggles twice — a net no-op. |
+| Tab dead on DSH ≥ 0.2.0-rc.2 (`405` on `POST /dsh-tab-plan-toggle/toggle`) | Fixed in 0.1.2. Connection RPC handlers now register through a context that also owns `webServer`; the Host's `register()` re-reads `webServer` from the calling fiber, so a handler injected with only `connection` cannot register its route and the request falls through to the SPA fallback (`405`). Upgrade. |
 | `… is not iterable` in the browser console | An older build read `session.events`; the Session API exposes `snapshotEvents()`. Upgrade. |
 | Tab hijacks other editors | The guard requires the editor to sit inside `[data-input-scroll]`; report the app surface if it does not. |
 
