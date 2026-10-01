@@ -24,7 +24,7 @@ Tab behaves normally everywhere else. It only toggles Plan mode when your cursor
 Open a terminal and run:
 
 ```bash
-dsh plugin --profile web add dsh-tab-plan-toggle
+dsh plugin --profile web add github:sujalmandal/dsh-tab-plan-toggle
 ```
 
 Then restart DeepSeek Harness:
@@ -34,17 +34,6 @@ dsh web
 ```
 
 That's it. Open the app and try pressing `Tab` while typing a message.
-
-<details>
-<summary>Prefer to install straight from GitHub?</summary>
-
-```bash
-dsh plugin --profile web add git+https://github.com/sujalmandal/dsh-tab-plan-toggle.git
-```
-
-Both install methods are equivalent. Use whichever you prefer.
-
-</details>
 
 ---
 
@@ -67,7 +56,7 @@ Yes — and this is the main thing the current version fixes. Earlier versions r
 ## Updating
 
 ```bash
-dsh plugin --profile web add dsh-tab-plan-toggle
+dsh plugin --profile web add github:sujalmandal/dsh-tab-plan-toggle
 ```
 
 Run the same command as installing. It fetches the newest version and replaces the old one.
@@ -97,6 +86,8 @@ Then restart `dsh web`. Tab goes straight back to its normal behaviour.
 <summary>How it works under the hood</summary>
 
 This is a small client-side plugin. It watches for Tab inside the composer, then runs DeepSeek Harness's own `/plan` and `/plan off` commands — the exact same ones you'd type by hand.
+
+It installs straight from the GitHub repository rather than the npm registry, since it isn't published there — the install command above already points at the right place.
 
 Because it goes through the app's public command interface and its public plan-mode state, it reads the real value the app uses to decide whether Plan mode is on. That means the badge, the button, and this plugin always agree — there's no separate copy of the state that can drift.
 
